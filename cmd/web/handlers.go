@@ -3,8 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	//"html/template"
+	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/unknowntpo/snippetbox/pkg/models"
@@ -18,14 +20,26 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := app.snippets.Latest()
+	// Initialize a slice containing paths to the two files. Note that the
+	// home.page.tmpl file must be the *first* file in the slice.
+	// use filepath.Join to generate os specific file path, which is more portable
+	root, _ := os.Getwd()
+	files := []string{
+		filepath.Join(root, "/ui/html/home.page.tmpl"),
+		filepath.Join(root, "/ui/html/base.layout.tmpl"),
+		filepath.Join(root, "/ui/html/footer.partial.tmpl"),
+	}
+
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	for _, snippet := range s {
-		fmt.Fprintf(w, "%v\n", snippet)
+	err = ts.Execute(w, nil)
+	if err != nil {
+		app.serverError(w, err)
+		return
 	}
 }
 
@@ -37,9 +51,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
-	// Use the SnippetModel object's Get method to retrieve the data for a
-	// specific record based on its ID. If no matching record is found,
-	// return a 404 Not Found response.
+
 	s, err := app.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -50,8 +62,24 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write the snippet data as a plain-text HTTP response body.
-	fmt.Fprintf(w, "%v", s)
+	// Initialize a slice containing the paths to the show.page.tmpl file,
+	// plus the base layout and footer partial that we made earlier.
+	root, _ := os.Getwd()
+	files := []string{
+		filepath.Join(root, "/ui/html/show.page.tmpl"),
+		filepath.Join(root, "/ui/html/base.layout.tmpl"),
+		filepath.Join(root, "/ui/html/footer.partial.tmpl"),
+	}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = ts.Execute(w, s)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 // Handle path /snippet/create
