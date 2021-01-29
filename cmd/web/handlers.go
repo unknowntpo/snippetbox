@@ -20,6 +20,15 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Create an instance of a templateData struct holding the slice of
+	// snippets.
+	data := &templateData{Snippets: s}
 	// Initialize a slice containing paths to the two files. Note that the
 	// home.page.tmpl file must be the *first* file in the slice.
 	// use filepath.Join to generate os specific file path, which is more portable
@@ -36,7 +45,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	// Pass in the templateData struct when executing the template.
+	err = ts.Execute(w, data)
 	if err != nil {
 		app.serverError(w, err)
 		return
