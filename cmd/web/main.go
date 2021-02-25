@@ -95,11 +95,11 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	infoLog.Printf("Starting server on %s", *addr)
 	// Use the ListenAndServeTLS() method to start the HTTPS server. We
 	// pass in the paths to the TLS certificate and corresponding private key as
 	// the two parameters.
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
-	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
 
