@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  web:
+    container_name: snippetbox_web
+    image: golang:1.14.2-alpine3.11 
+    command: sh -c "apk update && apk --update add make && make && ./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
+    ports:
+      - 4000:4000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: snippetbox_db
+      MYSQL_USER: web
+      MYSQL_PASSWORD: pass
+      MYSQL_DB: snippetbox
+    links:
+      - mysql
+  mysql:
+    container_name: snippetbox_db
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    volumes:
+      - snippetbox_data:/var/lib/mysql
+      - ./pkg/models/mysql/testdata/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: snippetbox
+      MYSQL_USER: web
+      MYSQL_PASSWORD: pass
+volumes:
+  snippetbox_data:
