@@ -2,9 +2,11 @@ version: "3.7"
 
 services:
   web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: snippetbox_web
-    image: golang:1.14.2-alpine3.11 
-    command: sh -c "apk update && apk --update add make && make && ./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
+    command: sh -c "make && ./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
     ports:
       - 4000:4000
     working_dir: /app
@@ -16,8 +18,10 @@ services:
       MYSQL_PASSWORD: pass
       MYSQL_DB: snippetbox
     links:
-      - mysql
-  mysql:
+      - db
+    depends_on:
+      - db
+  db:
     container_name: snippetbox_db
     image: mysql:5.7
     ports:
