@@ -6,8 +6,16 @@ import (
 	"net/http"
 )
 
+type Config struct {
+	Addr      string
+	StaticDir string
+}
+
 func main() {
-	addr := flag.String("addr", ":4000", "HTTP network address")
+	// Use structure to preserve command line args
+	cfg := new(Config)
+	flag.StringVar(&cfg.Addr, "addr", ":4000", "HTTP network address")
+	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
 	flag.Parse()
 
 	mux := http.NewServeMux()
@@ -15,11 +23,11 @@ func main() {
 	mux.HandleFunc("/snippet", showSnippet)
 	mux.HandleFunc("/snippet/create", createSnippet)
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	fileServer := http.FileServer(http.Dir(cfg.StaticDir))
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	log.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
+	log.Printf("Starting server on %s", cfg.Addr)
+	err := http.ListenAndServe(cfg.Addr, mux)
 	log.Fatal(err)
 }
