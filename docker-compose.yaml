@@ -8,7 +8,7 @@ services:
     container_name: snippetbox_web
     command: sh -c "make && ./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
     ports:
-      - 4000:4000
+      - 443:4000
     working_dir: /app
     volumes:
       - ./:/app
@@ -17,10 +17,12 @@ services:
       MYSQL_USER: web
       MYSQL_PASSWORD: pass
       MYSQL_DB: snippetbox
-    links:
-      - db
+    networks:
+        - backend
+        - outside
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     container_name: snippetbox_db
     image: mysql:5.7
@@ -34,5 +36,17 @@ services:
       MYSQL_DATABASE: snippetbox
       MYSQL_USER: web
       MYSQL_PASSWORD: pass
+    networks:
+        - backend
+    healthcheck:
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 5s
+        retries: 10
+
 volumes:
   snippetbox_data:
+
+networks:
+  backend:
+    internal: true # isolate from outside of this compose
+  outside: # for user to connect to our web service
