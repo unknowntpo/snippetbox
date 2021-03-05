@@ -31,7 +31,14 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
+	// Init http server
+	srv := &http.Server{
+		Addr:     cfg.Addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
 	infoLog.Printf("Starting server on %s", cfg.Addr)
-	err := http.ListenAndServe(cfg.Addr, mux)
+	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
