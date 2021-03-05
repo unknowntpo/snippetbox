@@ -6,7 +6,7 @@ all: build tls
 compose-up: 
 	$ sudo docker-compose up -d --force-recreate
 compose-down:
-	$ sudo docker-compose down -v
+	$ sudo docker-compose down
 build: 
 	go build -o $(BIN) ./cmd/web
 tls:
