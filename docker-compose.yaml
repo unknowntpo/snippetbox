@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: snippetbox_web
-    command: sh -c "make && ./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
+    command: sh -c "./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
     ports:
       - 443:4000
     working_dir: /app
@@ -50,3 +50,4 @@ networks:
   backend:
     internal: true # isolate from outside of this compose
   outside: # for user to connect to our web service
+    name: snippetbox-outside
