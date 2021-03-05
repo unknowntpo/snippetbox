@@ -1,5 +1,5 @@
 # build stage
-FROM golang:1.14.2-alpine3.11 as builder
+FROM golang:1.14.2-alpine3.11
 
 WORKDIR /app
 
@@ -9,12 +9,7 @@ COPY . .
 
 RUN make
 
-# final stage
-FROM golang:1.14.2-alpine3.11
+EXPOSE 4000
 
-WORKDIR /app
-COPY --from=builder /app/web .
-COPY --from=builder /app/tls/* ./tls/
-
-CMD ["./web"]
+CMD ["/app/web"]
 

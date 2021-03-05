@@ -6,12 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: snippetbox_web
-    command: sh -c "./web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
+    command: sh -c "/app/web -dsn 'web:pass@tcp(snippetbox_db:3306)/snippetbox?parseTime=true'"
     ports:
       - 443:4000
     working_dir: /app
-    volumes:
-      - ./:/app
     environment:
       MYSQL_HOST: snippetbox_db
       MYSQL_USER: web
