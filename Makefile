@@ -4,7 +4,7 @@ GOROOT=$(shell go env GOROOT)
 all: build tls
 
 compose-up: 
-	$ sudo docker-compose up -d --force-recreate
+	$ sudo docker-compose up -d --force-recreate --build --always-recreate-deps
 compose-down:
 	$ sudo docker-compose down
 build: 
