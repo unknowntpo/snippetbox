@@ -11,6 +11,7 @@ services:
       - 443:4000
     working_dir: /app
     environment:
+      TZ: "Asia/Taipei"
       MYSQL_HOST: snippetbox_db
       MYSQL_USER: web
       MYSQL_PASSWORD: pass
