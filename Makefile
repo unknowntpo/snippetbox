@@ -3,7 +3,7 @@ GOROOT=$(shell go env GOROOT)
 
 all: build
 
-build:
+build: tls
 	go build -o $(BIN) ./cmd/web
 tls:
 	@echo "Generating a Self-Signed TLS Certificate"
