@@ -31,6 +31,7 @@ services:
       - snippetbox_data:/var/lib/mysql
       - ./pkg/models/mysql/testdata/setup.sql:/docker-entrypoint-initdb.d/setup.sql
     environment:
+      TZ: "Asia/Taipei"
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: snippetbox
       MYSQL_USER: web
