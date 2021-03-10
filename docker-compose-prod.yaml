@@ -11,7 +11,7 @@ services:
       - 443:4000
     working_dir: /app
     environment:
-      TZ: "Asia/Taipei"
+      TZ: Asia/Taipei
       MYSQL_HOST: snippetbox_db
       MYSQL_USER: web
       MYSQL_PASSWORD: pass
@@ -31,7 +31,7 @@ services:
       - snippetbox_data:/var/lib/mysql
       - ./pkg/models/mysql/testdata/setup.sql:/docker-entrypoint-initdb.d/setup.sql
     environment:
-      TZ: "Asia/Taipei"
+      TZ: Asia/Taipei
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: snippetbox
       MYSQL_USER: web
