@@ -115,3 +115,23 @@ func TestSignupUser(t *testing.T) {
 		})
 	}
 }
+
+func TestAbout(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	wantCode := http.StatusOK
+	aboutUrl := "/about"
+	wantBody := []byte(`A great about page`)
+
+	code, _, body := ts.get(t, aboutUrl)
+	if code != wantCode {
+		t.Errorf("want %d; got %d", wantCode, code)
+	}
+
+	if !bytes.Contains(body, wantBody) {
+		t.Errorf("want body to contain %q", wantBody)
+	}
+}
