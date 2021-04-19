@@ -195,5 +195,5 @@ func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 
 // about handles showing about page for all users
 func (app *application) about(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`A great about page`))
+	app.render(w, r, "about.page.tmpl", nil)
 }

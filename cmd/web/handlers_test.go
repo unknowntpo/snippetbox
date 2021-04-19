@@ -73,7 +73,7 @@ func TestAbout(t *testing.T) {
 
 	wantCode := http.StatusOK
 	aboutUrl := "/about"
-	wantBody := []byte(`A great about page`)
+	wantBody := []byte(`A great about page.`)
 
 	code, _, body := ts.get(t, aboutUrl)
 	if code != wantCode {
@@ -81,6 +81,6 @@ func TestAbout(t *testing.T) {
 	}
 
 	if !bytes.Contains(body, wantBody) {
-		t.Errorf("want body to contain %q", wantBody)
+		t.Errorf("got %q, want body to contain %q", body, wantBody)
 	}
 }
