@@ -135,3 +135,31 @@ func TestAbout(t *testing.T) {
 		t.Errorf("got %q, want body to contain %q", body, wantBody)
 	}
 }
+
+// TestCreateSnippetForm tests the CreateSnippetForm() which should have these behavior:
+// 1. Unauthenticated users are redirected to the login form.
+// 2. Authenticated users are redirected to the login form.
+func TestCreateSnippetForm(t *testing.T) {
+	t.Run("Unauthenticated", func(t *testing.T) {
+		app := newTestApplication(t)
+		ts := newTestServer(t, app.routes())
+		defer ts.Close()
+
+		code, _, body := ts.get(t, "/snippet/create")
+		wantCode := http.StatusSeeOther
+
+		if code != wantCode {
+			t.Errorf("want %v, got %v", wantCode, code)
+		}
+		const seeOther = `<a href="/user/login">See Other</a>`
+		wantBody := []byte(seeOther)
+
+		if !bytes.Contains(body, wantBody) {
+			t.Errorf("got %q, want body to contain %q", body, wantBody)
+		}
+	})
+	t.Run("Authenticated", func(t *testing.T) {
+
+	})
+
+}
