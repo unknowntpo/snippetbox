@@ -135,3 +135,64 @@ func TestAbout(t *testing.T) {
 		t.Errorf("got %q, want body to contain %q", body, wantBody)
 	}
 }
+
+// TestCreateSnippetForm tests the CreateSnippetForm() which should have these behavior:
+// 1. Unauthenticated users are redirected to the login form.
+// 2. Authenticated users are redirected to the login form.
+func TestCreateSnippetForm(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, body := ts.get(t, "/snippet/create")
+		wantCode := http.StatusSeeOther
+
+		if code != wantCode {
+			t.Errorf("want %v, got %v", wantCode, code)
+		}
+		// Check body
+		gotHeader := headers.Get("Location")
+		wantHeader := "/user/login"
+		if gotHeader != wantHeader {
+			t.Errorf("want header to be %v, got %v", wantHeader, gotHeader)
+		}
+
+		const seeOther = `<a href="/user/login">See Other</a>`
+		wantBody := []byte(seeOther)
+
+		if !bytes.Contains(body, wantBody) {
+			t.Errorf("got %q, want body to contain %q", body, wantBody)
+		}
+	})
+	t.Run("Authenticated", func(t *testing.T) {
+		// GET /snippet/login
+		_, _, body := ts.get(t, "/user/login")
+		csrfToken := extractCSRFToken(t, body)
+
+		// use email: "alice@example.com", passwd: ""
+		form := url.Values{}
+		form.Add("name", "alice")
+		form.Add("email", "alice@example.com")
+		form.Add("password", "")
+		form.Add("csrf_token", csrfToken)
+		code, _, body := ts.postForm(t, "/user/login", form)
+		// check if login succeed
+		wantCode := http.StatusSeeOther
+		if code != wantCode {
+			t.Errorf("Wrong code, want %v, got %v", wantCode, code)
+		}
+
+		// GET /snippet/create
+		code, _, body = ts.get(t, "/snippet/create")
+		wantCode = http.StatusOK
+		if code != wantCode {
+			t.Errorf("Wrong code, want %v, got %v", wantCode, code)
+		}
+
+		// Verify content : <form action='/snippet/create' method='POST'>
+		formTag := `<form action='/snippet/create' method='POST'>`
+		if !bytes.Contains(body, []byte(formTag)) {
+			t.Errorf("got %q, want body to contain %q", body, formTag)
+		}
+	})
+}
