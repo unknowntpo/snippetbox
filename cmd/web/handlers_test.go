@@ -145,12 +145,19 @@ func TestCreateSnippetForm(t *testing.T) {
 		ts := newTestServer(t, app.routes())
 		defer ts.Close()
 
-		code, _, body := ts.get(t, "/snippet/create")
+		code, headers, body := ts.get(t, "/snippet/create")
 		wantCode := http.StatusSeeOther
 
 		if code != wantCode {
 			t.Errorf("want %v, got %v", wantCode, code)
 		}
+		// Check body
+		gotHeader := headers.Get("Location")
+		wantHeader := "/user/login"
+		if gotHeader != wantHeader {
+			t.Errorf("want header to be %v, got %v", wantHeader, gotHeader)
+		}
+
 		const seeOther = `<a href="/user/login">See Other</a>`
 		wantBody := []byte(seeOther)
 
