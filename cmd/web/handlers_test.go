@@ -140,11 +140,10 @@ func TestAbout(t *testing.T) {
 // 1. Unauthenticated users are redirected to the login form.
 // 2. Authenticated users are redirected to the login form.
 func TestCreateSnippetForm(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
 	t.Run("Unauthenticated", func(t *testing.T) {
-		app := newTestApplication(t)
-		ts := newTestServer(t, app.routes())
-		defer ts.Close()
-
 		code, headers, body := ts.get(t, "/snippet/create")
 		wantCode := http.StatusSeeOther
 
@@ -167,29 +166,22 @@ func TestCreateSnippetForm(t *testing.T) {
 	})
 	t.Run("Authenticated", func(t *testing.T) {
 		// GET /snippet/login
-		app := newTestApplication(t)
-		ts := newTestServer(t, app.routes())
-		defer ts.Close()
 		_, _, body := ts.get(t, "/user/login")
 		csrfToken := extractCSRFToken(t, body)
 
 		// use email: "alice@example.com", passwd: ""
-		userName := "alice"
-		userEmail := "alice@example.com"
-		userPassword := ""
-
 		form := url.Values{}
-		form.Add("name", userName)
-		form.Add("email", userEmail)
-		form.Add("password", userPassword)
+		form.Add("name", "alice")
+		form.Add("email", "alice@example.com")
+		form.Add("password", "")
 		form.Add("csrf_token", csrfToken)
-
 		code, _, body := ts.postForm(t, "/user/login", form)
 		// check if login succeed
 		wantCode := http.StatusSeeOther
 		if code != wantCode {
 			t.Errorf("Wrong code, want %v, got %v", wantCode, code)
 		}
+
 		// GET /snippet/create
 		code, _, body = ts.get(t, "/snippet/create")
 		wantCode = http.StatusOK
@@ -198,9 +190,9 @@ func TestCreateSnippetForm(t *testing.T) {
 		}
 
 		// Verify content : <form action='/snippet/create' method='POST'>
-		wantBody := `<form action='/snippet/create' method='POST'>`
-		if !bytes.Contains(body, []byte(wantBody)) {
-			t.Errorf("got %q, want body to contain %q", body, wantBody)
+		formTag := `<form action='/snippet/create' method='POST'>`
+		if !bytes.Contains(body, []byte(formTag)) {
+			t.Errorf("got %q, want body to contain %q", body, formTag)
 		}
 	})
 }
