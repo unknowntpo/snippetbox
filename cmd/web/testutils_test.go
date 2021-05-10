@@ -126,3 +126,24 @@ func (ts *testServer) postForm(t *testing.T, urlPath string, form url.Values) (i
 	// Return the response status, headers and body.
 	return rs.StatusCode, rs.Header, body
 }
+
+// userLogin use mock user: alice to do login operation
+func userLogin(t *testing.T, ts *testServer) {
+	t.Helper()
+	// GET /snippet/login
+	_, _, body := ts.get(t, "/user/login")
+	csrfToken := extractCSRFToken(t, body)
+
+	// use email: "alice@example.com", passwd: ""
+	form := url.Values{}
+	form.Add("name", "alice")
+	form.Add("email", "alice@example.com")
+	form.Add("password", "")
+	form.Add("csrf_token", csrfToken)
+	code, _, body := ts.postForm(t, "/user/login", form)
+	// check if login succeed
+	wantCode := http.StatusSeeOther
+	if code != wantCode {
+		t.Errorf("Wrong code, want %v, got %v", wantCode, code)
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/url"
+	"regexp"
 	"testing"
 )
 
@@ -165,26 +166,29 @@ func TestCreateSnippetForm(t *testing.T) {
 		}
 	})
 	t.Run("Authenticated", func(t *testing.T) {
-		// GET /snippet/login
-		_, _, body := ts.get(t, "/user/login")
-		csrfToken := extractCSRFToken(t, body)
+		/*
+			// GET /snippet/login
+			_, _, body := ts.get(t, "/user/login")
+			csrfToken := extractCSRFToken(t, body)
 
-		// use email: "alice@example.com", passwd: ""
-		form := url.Values{}
-		form.Add("name", "alice")
-		form.Add("email", "alice@example.com")
-		form.Add("password", "")
-		form.Add("csrf_token", csrfToken)
-		code, _, body := ts.postForm(t, "/user/login", form)
-		// check if login succeed
-		wantCode := http.StatusSeeOther
-		if code != wantCode {
-			t.Errorf("Wrong code, want %v, got %v", wantCode, code)
-		}
+			// use email: "alice@example.com", passwd: ""
+			form := url.Values{}
+			form.Add("name", "alice")
+			form.Add("email", "alice@example.com")
+			form.Add("password", "")
+			form.Add("csrf_token", csrfToken)
+			code, _, body := ts.postForm(t, "/user/login", form)
+			// check if login succeed
+			wantCode := http.StatusSeeOther
+			if code != wantCode {
+				t.Errorf("Wrong code, want %v, got %v", wantCode, code)
+			}
 
+		*/
+		userLogin(t, ts)
 		// GET /snippet/create
-		code, _, body = ts.get(t, "/snippet/create")
-		wantCode = http.StatusOK
+		code, _, body := ts.get(t, "/snippet/create")
+		wantCode := http.StatusOK
 		if code != wantCode {
 			t.Errorf("Wrong code, want %v, got %v", wantCode, code)
 		}
@@ -195,4 +199,36 @@ func TestCreateSnippetForm(t *testing.T) {
 			t.Errorf("got %q, want body to contain %q", body, formTag)
 		}
 	})
+}
+
+func TestUserProfile(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	userLogin(t, ts)
+	code, headers, body := ts.get(t, "/user/profile")
+	//t.Log("body: ", string(body))
+	_ = headers
+
+	wantCode := http.StatusOK
+	if code != wantCode {
+		t.Errorf("Wrong code, want %v, got %v", wantCode, code)
+	}
+
+	name := `<td>Alice</td>`
+	if !bytes.Contains(body, []byte(name)) {
+		t.Errorf("got %q, want body to contain %q", body, name)
+	}
+
+	email := `<td>alice@example.com</td>`
+	if !bytes.Contains(body, []byte(email)) {
+		t.Errorf("got %q, want body to contain %q", body, email)
+	}
+
+	dateFormat := `02 Jan 2006 at 15:04`
+	matched, _ := regexp.Match(`(\d\d) ([A-Z][a-z][a-z]) (\d\d\d\d) at (\d\d:\d\d)`, []byte(body))
+	if !matched {
+		t.Errorf("got %q, want Joined field to match the format: %q", body, dateFormat)
+	}
 }
