@@ -1,0 +1,27 @@
+{{template "base" .}}
+
+{{define "title"}}User Profile{{end}}
+
+{{define "main"}}
+    <h2>User Profile</h2>
+    {{if .User}}
+        <table>
+            {{with .User}}
+            <tr>
+                <th>Name</th>
+                <td>{{.Name}}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{.Email}}</td>
+            </tr>
+            <tr>
+                <th>Joined</th>
+                <td>{{humanDate .Created}}</td>
+            </tr>
+            {{end}}
+        </table>
+    {{else}}
+        <p>There's nothing to see here... yet!</p>
+    {{end}}
+{{end}}

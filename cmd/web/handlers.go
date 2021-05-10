@@ -197,3 +197,23 @@ func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "about.page.tmpl", nil)
 }
+
+// userProfile is the handler for GET /user/profile
+func (app *application) userProfile(w http.ResponseWriter, r *http.Request) {
+	// get userID from session
+	id, ok := app.session.Get(r, "authenticatedUserID").(int)
+	if !ok {
+		app.serverError(w, errors.New("type assertion to int failed"))
+		return
+	}
+	// fire up query to get *model.User
+	user, err := app.users.Get(id)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "profile.page.tmpl", &templateData{
+		User: user,
+	})
+}
